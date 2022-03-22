@@ -54,7 +54,7 @@ class Simulation():
     - Space
     """
 
-    def __init__(self, simulation_length: int = 100, n_agents: int = 20):
+    def __init__(self, simulation_length: int = 100, n_agents: int = 50):
         self.simulation_length = simulation_length
         self.n_agents = n_agents
         self.state = np.array([])
@@ -103,11 +103,24 @@ class Simulation():
 
     def add_obstacle(self, obstacle: Segment) -> Space:
         """Add obstacle to the space"""
-        # TODO: let the number of slice uniform despite the length of the segment
+        length = np.sqrt((obstacle[0][0] - obstacle[1][0]) ** 2 + (obstacle[0][1] - obstacle[1][1]) ** 2)
+        n_split = round(10 * length)
         if len(self.space) == 0:
-            self.space = [np.linspace(*obstacle, 100)]
+            self.space = [np.linspace(*obstacle, 1000)]
         else:
-            self.space.append(np.linspace(*obstacle, 100))
+            self.space.extend([np.linspace(*obstacle, 1000)])
+        return self.space
+
+    def add_random_obstacle(
+        self,
+        x_lower: float = -10.0,
+        x_upper: float = 10.0,
+        y_lower: float = -10.0,
+        y_upper: float = 10.0) -> Space:
+        obstacle_start_point = self.create_rectangular_random_position(x_lower, x_upper, y_lower, y_upper)
+        obstacle_end_point = self.create_rectangular_random_position(x_lower, x_upper, y_lower, y_upper)
+        obstacle: Segment = (obstacle_start_point, obstacle_end_point)
+        self.add_obstacle(obstacle)
         return self.space
 
     def add_hole(self, hole: Tuple[float, float], x_pos: float) -> Space:
@@ -132,8 +145,8 @@ class Simulation():
             ax.set_xlabel('x [m]')
             ax.set_ylabel('y [m]')
             # TODO: determine lim dynamically according to state and space
-            ax.set_xlim(-20, 15)
-            ax.set_ylim(-10, 10)
+            ax.set_xlim(-20, 20)
+            ax.set_ylim(-20, 20)
 
             for s in self.space:
                 ax.plot(s[:, 0], s[:, 1], 'o', color='black', markersize=2.5)
@@ -193,6 +206,7 @@ class SimulationAdmin():
         """Create json formatted metadata file"""
         # file_path = "../deepmind-research/learning_to_simulate/datasets/SFM/metadata.json"
         file_path = base_output_path + 'metadata.json'
+        print(metadata)
         with open(file_path, 'w') as f:
             json.dump(metadata, f)
 
@@ -217,6 +231,8 @@ class SimulationAdmin():
                 simulation = Simulation(self.simulation_length)
                 # TODO: implement as callback function
                 simulation.add_agents()
+                simulation.add_random_obstacle()
+                simulation.add_random_obstacle()
                 simulation.execute()
                 if i == 0:
                     simulation.visualize()
@@ -304,7 +320,6 @@ class SimulationAdmin():
             'acc_mean': acc_mean.tolist(),
             'acc_std': acc_std.tolist()
         }
-        print(metadata)
         self.create_metadata(metadata, base_output_path)
 
     def create_all_data(self, n_train_data: int = 1000, n_valid_data: int = 100, n_test_data: int = 100, simulation_length: int = 100):
