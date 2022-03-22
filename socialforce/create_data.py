@@ -254,8 +254,6 @@ class SimulationAdmin():
                 obstacle_agents = self.create_obstacle_agents(simulation.space, self.simulation_length)
                 moving_agents = self.create_moving_agents(simulation.states)
                 agents = np.concatenate([obstacle_agents, moving_agents], axis=1)
-                print(obstacle_agents.shape[1])
-                print(moving_agents.shape[1])
                 obstacle_row = [np.int64(3)] * obstacle_agents.shape[1]
                 moving_row = [np.int64(8)] * moving_agents.shape[1]
                 agents_row = obstacle_row + moving_row
