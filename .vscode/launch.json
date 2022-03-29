@@ -8,13 +8,13 @@
             "justMyCode": true,
         },
         {
-            "name": "Create 2000 train data",
+            "name": "Create data at learning_to_simulate",
             "type": "python",
             "request": "launch",
             "module": "socialforce.create_data",
             "justMyCode": true,
             "args": [
-                "--n_train_data=2000"
+                "--base_output_path=../deepmind-research/learning_to_simulate/datasets/SFM/"
             ]
         }
     ]
