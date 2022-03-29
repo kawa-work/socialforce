@@ -63,7 +63,7 @@ class Simulation():
     def create_rectangular_random_position(
             self,
             x_lower: float = -10.0,
-            x_upper: float = 10.0,
+            x_upper: float = -3.0,
             y_lower: float = -10.0,
             y_upper: float = 10.0) -> Position:
         """Create agents randomly in the rectangular area"""
@@ -102,7 +102,12 @@ class Simulation():
         return self.state
 
     def add_random_dest_agents(self) -> State:
-        dest = self.create_rectangular_random_position()
+        dest = self.create_rectangular_random_position(
+            x_lower = 2.0,
+            x_upper = 8.0,
+            y_lower = -3.0,
+            y_upper = 3.0
+            )
         self.add_agents(destination=dest)
         return self.state
 
@@ -127,12 +132,22 @@ class Simulation():
         obstacle: Segment = (obstacle_start_point, obstacle_end_point)
         self.add_obstacle(obstacle)
         return self.space
+    
+    def create_random_hole_position(self, lower: float = -5.0, upper: float = 5.0):
+        hole_width = 2.0
+        hole_lower = random.uniform(lower, (upper - hole_width))
+        hole_upper = hole_lower + hole_width
+        return hole_lower, hole_upper
 
-    def add_hole(self, hole: Tuple[float, float], x_pos: float) -> Space:
+    def add_hole(self, hole: Tuple[float, float], x_pos: float = 0.0) -> Space:
         """Add obstacle with a hole to the space"""
         self.add_obstacle(((x_pos, -10), (x_pos, hole[0])))
         self.add_obstacle(((x_pos, hole[1]), (x_pos, 10)))
         return self.space
+
+    def add_random_hole(self, x_pos: float = 0.0):
+        hole = self.create_random_hole_position()
+        self.add_hole(hole)
 
     def execute(self):
         s = socialforce.Simulator(
@@ -236,8 +251,7 @@ class SimulationAdmin():
                 simulation = Simulation(self.simulation_length)
                 # TODO: implement as callback function
                 simulation.add_random_dest_agents()
-                simulation.add_random_obstacle()
-                simulation.add_random_obstacle()
+                simulation.add_random_hole()
                 simulation.execute()
                 if i == 0:
                     simulation.visualize()
