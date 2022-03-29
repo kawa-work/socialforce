@@ -63,8 +63,8 @@ class Simulation():
     def create_rectangular_random_position(
             self,
             x_lower: float = -10.0,
-            x_upper: float = -5.0,
-            y_lower: float = -5.0,
+            x_upper: float = 10.0,
+            y_lower: float = -10.0,
             y_upper: float = 10.0) -> Position:
         """Create agents randomly in the rectangular area"""
         rand_x = random.uniform(x_lower, x_upper)
@@ -89,7 +89,7 @@ class Simulation():
         rand_angle = random.uniform(theta_lower, theta_upper)
         return self._get_xy_from_rd(rand_radius, rand_angle)
 
-    def add_agents(self, destination: Position = (0.0, 0.0), create_position: CreatePosition = create_circular_random_position) -> State:
+    def add_agents(self, destination: Position = (0.0, 0.0), create_position: CreatePosition = create_rectangular_random_position) -> State:
         """Return initial agent state"""
         init_speed = (1.0, 0.0)
         if self.state.shape[0] == 0:
@@ -101,14 +101,19 @@ class Simulation():
             self.state = np.append(self.state, new_state, axis=0)
         return self.state
 
+    def add_random_dest_agents(self) -> State:
+        dest = self.create_rectangular_random_position()
+        self.add_agents(destination=dest)
+        return self.state
+
     def add_obstacle(self, obstacle: Segment) -> Space:
         """Add obstacle to the space"""
         length = np.sqrt((obstacle[0][0] - obstacle[1][0]) ** 2 + (obstacle[0][1] - obstacle[1][1]) ** 2)
         n_split = round(10 * length)
         if len(self.space) == 0:
-            self.space = [np.linspace(*obstacle, 1000)]
+            self.space = [np.linspace(*obstacle, 100)]
         else:
-            self.space.extend([np.linspace(*obstacle, 1000)])
+            self.space.extend([np.linspace(*obstacle, 100)])
         return self.space
 
     def add_random_obstacle(
@@ -230,7 +235,7 @@ class SimulationAdmin():
                 print(f"Dealing with ({i + 1}/{n_data}) simulation")
                 simulation = Simulation(self.simulation_length)
                 # TODO: implement as callback function
-                simulation.add_agents()
+                simulation.add_random_dest_agents()
                 simulation.add_random_obstacle()
                 simulation.add_random_obstacle()
                 simulation.execute()
